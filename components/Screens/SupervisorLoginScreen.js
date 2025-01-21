@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   backButtonText: {
-    color: COLORS.textGray,
+    color: COLORS.primary,
     fontSize: 14,
   }
 });
