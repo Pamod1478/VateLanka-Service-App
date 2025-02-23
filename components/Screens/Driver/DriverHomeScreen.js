@@ -11,12 +11,13 @@ import CustomText from "../../utils/CustomText";
 import { auth } from "../../utils/firebaseConfig";
 import Icon from "react-native-vector-icons/Feather";
 
-export default function SupervisorHomeScreen({ route, navigation }) {
+export default function DriverHomeScreen({ route, navigation }) {
   const profile = route?.params?.profile || {};
 
   const handleLogout = async () => {
     try {
       await auth.signOut();
+      navigation.replace("LoginSelection");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -25,7 +26,7 @@ export default function SupervisorHomeScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <CustomText style={styles.headerTitle}>Supervisor Dashboard</CustomText>
+        <CustomText style={styles.headerTitle}>Driver Dashboard</CustomText>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <Icon name="log-out" size={24} color={COLORS.primary} />
         </TouchableOpacity>
@@ -34,29 +35,37 @@ export default function SupervisorHomeScreen({ route, navigation }) {
       <ScrollView style={styles.content}>
         <View style={styles.profileCard}>
           <CustomText style={styles.welcomeText}>
-            Welcome back, {profile.name || "Supervisor"}
+            Welcome back, {profile.driverName || "Driver"}
+          </CustomText>
+          <CustomText style={styles.infoText}>
+            Truck ID: {profile.truckId || "Loading..."}
+          </CustomText>
+          <CustomText style={styles.infoText}>
+            Number Plate: {profile.numberPlate || "Loading..."}
           </CustomText>
           <CustomText style={styles.infoText}>
             Ward: {profile.ward || "Loading..."}
-          </CustomText>
-          <CustomText style={styles.infoText}>
-            District: {profile.district || "Loading..."}
           </CustomText>
         </View>
 
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <Icon name="truck" size={24} color={COLORS.primary} />
-            <CustomText style={styles.statTitle}>Total Trucks</CustomText>
-            <CustomText style={styles.statValue}>5</CustomText>
+            <Icon name="map-pin" size={24} color={COLORS.primary} />
+            <CustomText style={styles.statTitle}>Today's Route</CustomText>
+            <CustomText style={styles.statValue}>Route 3</CustomText>
           </View>
 
           <View style={styles.statCard}>
-            <Icon name="calendar" size={24} color={COLORS.primary} />
-            <CustomText style={styles.statTitle}>Today's Routes</CustomText>
-            <CustomText style={styles.statValue}>3</CustomText>
+            <Icon name="package" size={24} color={COLORS.primary} />
+            <CustomText style={styles.statTitle}>Collections</CustomText>
+            <CustomText style={styles.statValue}>12</CustomText>
           </View>
         </View>
+
+        <TouchableOpacity style={styles.actionButton}>
+          <Icon name="navigation" size={24} color={COLORS.white} />
+          <CustomText style={styles.actionButtonText}>Start Route</CustomText>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -143,5 +152,19 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.primary,
     marginTop: 5,
+  },
+  actionButton: {
+    backgroundColor: COLORS.primary,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 15,
+    borderRadius: 15,
+    gap: 10,
+  },
+  actionButtonText: {
+    color: COLORS.white,
+    fontSize: 18,
+    fontWeight: "600",
   },
 });

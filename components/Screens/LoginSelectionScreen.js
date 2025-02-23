@@ -1,4 +1,3 @@
-// src/components/Screens/LoginSelectionScreen.js
 import React from "react";
 import {
   SafeAreaView,
@@ -16,7 +15,9 @@ export default function LoginSelectionScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <CustomText style={styles.headerText}>Select Your Role</CustomText>
-        <CustomText style={styles.subtitle}>Choose your service role to continue</CustomText>
+        <CustomText style={styles.subtitle}>
+          Choose your service role to continue
+        </CustomText>
       </View>
 
       <View style={styles.buttonContainer}>
@@ -46,7 +47,9 @@ export default function LoginSelectionScreen({ navigation }) {
             <Feather name="user" size={32} color={COLORS.primary} />
           </View>
           <View style={styles.textContainer}>
-            <CustomText style={styles.roleText}>Municipal Supervisor</CustomText>
+            <CustomText style={styles.roleText}>
+              Municipal Supervisor
+            </CustomText>
             <CustomText style={styles.roleDescription}>
               Login as municipal council supervisor
             </CustomText>
@@ -88,7 +91,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     gap: 20,
     marginLeft: 5,
-    marginRight: 5
+    marginRight: 5,
   },
   roleButton: {
     flexDirection: "row",
