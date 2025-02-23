@@ -1,18 +1,67 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { COLORS } from "../../utils/Constants";
 import CustomText from "../../utils/CustomText";
 import { auth } from "../../utils/firebaseConfig";
 import Icon from "react-native-vector-icons/Feather";
+import { subscribeToDriverUpdates } from "../../services/firebaseFirestore";
 
 export default function DriverHomeScreen({ route, navigation }) {
   const profile = route?.params?.profile || {};
+  const [driverData, setDriverData] = useState(profile);
+  const [greeting, setGreeting] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    updateGreeting();
+    if (profile.driverName) {
+      setFirstName(profile.driverName);
+    }
+  }, [profile.driverName]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToDriverUpdates(
+      profile.truckId,
+      profile.municipalCouncil,
+      profile.district,
+      profile.ward,
+      profile.supervisorId,
+      (data) => {
+        if (data) {
+          setDriverData(data);
+        }
+        setLoading(false);
+        setRefreshing(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [profile]);
+
+  const updateGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      setGreeting("Good Morning");
+    } else if (hour >= 12 && hour < 17) {
+      setGreeting("Good Afternoon");
+    } else {
+      setGreeting("Good Evening");
+    }
+  };
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -23,55 +72,90 @@ export default function DriverHomeScreen({ route, navigation }) {
     }
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <CustomText style={styles.headerTitle}>Driver Dashboard</CustomText>
+        <View>
+          <CustomText style={styles.headerTitle}>Driver Dashboard</CustomText>
+          <CustomText style={styles.dateText}>
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </CustomText>
+        </View>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <Icon name="log-out" size={24} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
+      >
         <View style={styles.profileCard}>
-          <CustomText style={styles.welcomeText}>
-            Welcome back, {profile.driverName || "Driver"}
-          </CustomText>
-          <CustomText style={styles.infoText}>
-            Truck ID: {profile.truckId || "Loading..."}
-          </CustomText>
-          <CustomText style={styles.infoText}>
-            Number Plate: {profile.numberPlate || "Loading..."}
-          </CustomText>
-          <CustomText style={styles.infoText}>
-            Ward: {profile.ward || "Loading..."}
-          </CustomText>
-        </View>
-
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Icon name="map-pin" size={24} color={COLORS.primary} />
-            <CustomText style={styles.statTitle}>Today's Route</CustomText>
-            <CustomText style={styles.statValue}>Route 3</CustomText>
+          <View style={styles.greetingContainer}>
+            <CustomText style={styles.greetingText}>{greeting},</CustomText>
+            <CustomText style={styles.nameText}>{firstName}</CustomText>
           </View>
-
-          <View style={styles.statCard}>
-            <Icon name="package" size={24} color={COLORS.primary} />
-            <CustomText style={styles.statTitle}>Collections</CustomText>
-            <CustomText style={styles.statValue}>12</CustomText>
+          <View style={styles.divider} />
+          <View style={styles.infoContainer}>
+            <View style={styles.infoRow}>
+              <Icon name="truck" size={20} color={COLORS.primary} />
+              <CustomText style={styles.infoText}>
+                Truck ID: {driverData.truckId || "Loading..."}
+              </CustomText>
+            </View>
+            <View style={styles.infoRow}>
+              <Icon name="hash" size={20} color={COLORS.primary} />
+              <CustomText style={styles.infoText}>
+                Vehicle No: {driverData.numberPlate || "Loading..."}
+              </CustomText>
+            </View>
+            <View style={styles.infoRow}>
+              <Icon name="user" size={20} color={COLORS.primary} />
+              <CustomText style={styles.infoText}>
+                Supervisor ID: {driverData.supervisorId || "Loading..."}
+              </CustomText>
+            </View>
+            <View style={styles.infoRow}>
+              <Icon name="map-pin" size={20} color={COLORS.primary} />
+              <CustomText style={styles.infoText}>
+                Ward: {driverData.ward || "Loading..."}
+              </CustomText>
+            </View>
           </View>
         </View>
-
-        <TouchableOpacity style={styles.actionButton}>
-          <Icon name="navigation" size={24} color={COLORS.white} />
-          <CustomText style={styles.actionButtonText}>Start Route</CustomText>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: COLORS.white,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
@@ -89,6 +173,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.primary,
   },
+  dateText: {
+    fontSize: 14,
+    color: COLORS.textGray,
+    marginTop: 4,
+  },
   logoutButton: {
     padding: 10,
   },
@@ -102,69 +191,39 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 20,
     shadowColor: COLORS.black,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
-  welcomeText: {
-    fontSize: 22,
-    fontWeight: "600",
-    marginBottom: 10,
-    color: COLORS.black,
+  greetingContainer: {
+    marginBottom: 15,
+  },
+  greetingText: {
+    fontSize: 16,
+    color: COLORS.textGray,
+  },
+  nameText: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: COLORS.primary,
+    marginTop: 5,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: COLORS.borderGray,
+    marginVertical: 15,
+  },
+  infoContainer: {
+    gap: 12,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   infoText: {
     fontSize: 16,
     color: COLORS.textGray,
-    marginBottom: 5,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-    borderRadius: 15,
-    padding: 15,
-    marginHorizontal: 5,
-    alignItems: "center",
-    shadowColor: COLORS.black,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  statTitle: {
-    fontSize: 14,
-    color: COLORS.textGray,
-    marginTop: 5,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: COLORS.primary,
-    marginTop: 5,
-  },
-  actionButton: {
-    backgroundColor: COLORS.primary,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 15,
-    borderRadius: 15,
-    gap: 10,
-  },
-  actionButtonText: {
-    color: COLORS.white,
-    fontSize: 18,
-    fontWeight: "600",
   },
 });
