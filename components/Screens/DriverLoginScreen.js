@@ -44,8 +44,9 @@ export default function DriverLoginScreen({ navigation }) {
       const result = await loginDriver(truckId.trim().toUpperCase(), password);
 
       showNotification("Login successful!", "success");
+
       setTimeout(() => {
-        navigation.replace("DriverHome", { profile: result.profile });
+        navigation.navigate("Welcome");
       }, 1000);
     } catch (error) {
       showNotification(error.message || "Invalid credentials", "error");
