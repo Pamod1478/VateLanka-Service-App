@@ -7,10 +7,11 @@ import {
   SafeAreaView,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { COLORS } from "../../utils/Constants";
 import CustomText from "../../utils/CustomText";
-import { auth } from "../../utils/firebaseConfig";
+import { logout } from "../../services/firebaseAuth";
 import Icon from "react-native-vector-icons/Feather";
 import { subscribeToDriverUpdates } from "../../services/firebaseFirestore";
 
@@ -21,6 +22,19 @@ export default function DriverHomeScreen({ route, navigation }) {
   const [firstName, setFirstName] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.log("Forced loading end due to timeout");
+        setLoading(false);
+        setLoadingTimeout(true);
+      }
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   useEffect(() => {
     updateGreeting();
@@ -30,22 +44,45 @@ export default function DriverHomeScreen({ route, navigation }) {
   }, [profile.driverName]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToDriverUpdates(
-      profile.truckId,
-      profile.municipalCouncil,
-      profile.district,
-      profile.ward,
-      profile.supervisorId,
-      (data) => {
-        if (data) {
-          setDriverData(data);
-        }
+    try {
+      if (
+        !profile.truckId ||
+        !profile.municipalCouncil ||
+        !profile.district ||
+        !profile.ward ||
+        !profile.supervisorId
+      ) {
+        console.log("Missing required profile data for Firestore query");
         setLoading(false);
-        setRefreshing(false);
+        return () => {};
       }
-    );
 
-    return () => unsubscribe();
+      const unsubscribe = subscribeToDriverUpdates(
+        profile.truckId,
+        profile.municipalCouncil,
+        profile.district,
+        profile.ward,
+        profile.supervisorId,
+        (data) => {
+          if (data) {
+            setDriverData(data);
+            if (data.driverName && !firstName) {
+              setFirstName(data.driverName);
+            }
+          }
+          setLoading(false);
+          setRefreshing(false);
+          setLoadingTimeout(false);
+        }
+      );
+
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error subscribing to driver updates:", error);
+      setLoading(false);
+      setRefreshing(false);
+      return () => {};
+    }
   }, [profile]);
 
   const updateGreeting = () => {
@@ -61,14 +98,19 @@ export default function DriverHomeScreen({ route, navigation }) {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
+    setTimeout(() => {
+      if (refreshing) {
+        setRefreshing(false);
+      }
+    }, 5000);
   }, []);
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
-      navigation.replace("LoginSelection");
+      await logout();
     } catch (error) {
       console.error("Logout error:", error);
+      Alert.alert("Error", "Failed to logout. Please try again.");
     }
   };
 
@@ -114,35 +156,50 @@ export default function DriverHomeScreen({ route, navigation }) {
         <View style={styles.profileCard}>
           <View style={styles.greetingContainer}>
             <CustomText style={styles.greetingText}>{greeting},</CustomText>
-            <CustomText style={styles.nameText}>{firstName}</CustomText>
+            <CustomText style={styles.nameText}>
+              {firstName || "Driver"}
+            </CustomText>
           </View>
           <View style={styles.divider} />
           <View style={styles.infoContainer}>
             <View style={styles.infoRow}>
               <Icon name="truck" size={20} color={COLORS.primary} />
               <CustomText style={styles.infoText}>
-                Truck ID: {driverData.truckId || "Loading..."}
+                Truck ID: {driverData.truckId || "Not available"}
               </CustomText>
             </View>
             <View style={styles.infoRow}>
               <Icon name="hash" size={20} color={COLORS.primary} />
               <CustomText style={styles.infoText}>
-                Vehicle No: {driverData.numberPlate || "Loading..."}
+                Vehicle No: {driverData.numberPlate || "Not available"}
               </CustomText>
             </View>
             <View style={styles.infoRow}>
               <Icon name="user" size={20} color={COLORS.primary} />
               <CustomText style={styles.infoText}>
-                Supervisor ID: {driverData.supervisorId || "Loading..."}
+                Supervisor ID: {driverData.supervisorId || "Not available"}
               </CustomText>
             </View>
             <View style={styles.infoRow}>
               <Icon name="map-pin" size={20} color={COLORS.primary} />
               <CustomText style={styles.infoText}>
-                Ward: {driverData.ward || "Loading..."}
+                Ward: {driverData.ward || "Not available"}
               </CustomText>
             </View>
           </View>
+
+          {loadingTimeout && (
+            <View style={styles.warningBox}>
+              <Icon
+                name="alert-triangle"
+                size={16}
+                color={COLORS.errorbanner}
+              />
+              <CustomText style={styles.warningText}>
+                Some data may not be fully loaded. Pull down to refresh.
+              </CustomText>
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -225,5 +282,20 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
     color: COLORS.textGray,
+  },
+  warningBox: {
+    backgroundColor: "#FFF5F5",
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.errorbanner,
+  },
+  warningText: {
+    color: COLORS.errorbanner,
+    fontSize: 12,
+    marginLeft: 8,
   },
 });
