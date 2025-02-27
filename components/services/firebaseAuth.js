@@ -8,6 +8,10 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import {
+  saveProviderSession,
+  clearProviderSession,
+} from "../utils/authStorage";
 
 export const loginSupervisor = async (supervisorId, password) => {
   try {
@@ -50,6 +54,12 @@ export const loginSupervisor = async (supervisorId, password) => {
       auth,
       supervisorData.email,
       password
+    );
+
+    await saveProviderSession(
+      userCredential.user,
+      supervisorData,
+      "supervisor"
     );
 
     return {
@@ -115,6 +125,8 @@ export const loginDriver = async (truckId, password) => {
       password
     );
 
+    await saveProviderSession(userCredential.user, truckData, "driver");
+
     return {
       user: userCredential.user,
       profile: truckData,
@@ -130,6 +142,7 @@ export const loginDriver = async (truckId, password) => {
 
 export const logout = async () => {
   try {
+    await clearProviderSession();
     await signOut(auth);
   } catch (error) {
     console.error("Logout error:", error);
