@@ -13,6 +13,7 @@ import {
 import { COLORS } from "../utils/Constants";
 import CustomText from "../utils/CustomText";
 import { loginSupervisor } from "../services/firebaseAuth";
+import { getProviderSession } from "../utils/authStorage";
 import NotificationBanner from "../utils/NotificationBanner";
 
 export default function SupervisorLoginScreen({ navigation }) {
@@ -50,9 +51,22 @@ export default function SupervisorLoginScreen({ navigation }) {
       );
 
       showNotification("Login successful!", "success");
-      setTimeout(() => {
-        navigation.replace("SupervisorHome", { profile: result.profile });
-      }, 1000);
+
+      setTimeout(async () => {
+        const session = await getProviderSession();
+        if (session) {
+          console.log("Session verified before navigation");
+        } else {
+          console.log("Session not yet available, waiting longer...");
+          setTimeout(async () => {
+            const retrySession = await getProviderSession();
+            console.log(
+              "Final session check:",
+              retrySession ? "Session found" : "No session"
+            );
+          }, 1000);
+        }
+      }, 1500);
     } catch (error) {
       showNotification(error.message || "Invalid credentials", "error");
     } finally {
