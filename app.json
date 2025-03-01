@@ -13,14 +13,24 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "VateLanka needs to track your location for waste collection routes",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "VateLanka needs background location access to track waste collection routes"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.nemitha2005.VateLankaServiceApp"
+      "package": "com.nemitha2005.VateLankaServiceApp",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -29,6 +39,16 @@
       "eas": {
         "projectId": "0ed1bbf0-b761-414c-bf4c-c41e05a3e14a"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow VateLanka to use your location for waste collection tracking."
+        }
+      ],
+      "react-native-background-fetch",
+      "react-native-background-geolocation"
+    ]
   }
 }
