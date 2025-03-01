@@ -11,6 +11,8 @@ import DriverLoginScreen from "./components/Screens/DriverLoginScreen";
 import SupervisorLoginScreen from "./components/Screens/SupervisorLoginScreen";
 import SupervisorHomeScreen from "./components/Screens/Supervisor/SupervisorHomeScreen";
 import DriverHomeScreen from "./components/Screens/Driver/DriverHomeScreen";
+import MapViewScreen from "./components/Screens/Driver/MapViewScreen";
+import ConfirmStopScreen from "./components/Screens/Driver/ConfirmStopScreen";
 import { auth } from "./components/utils/firebaseConfig";
 import { getProviderSession } from "./components/utils/authStorage";
 import { COLORS } from "./components/utils/Constants";
@@ -29,6 +31,30 @@ const AuthStack = () => (
     <Stack.Screen name="LoginSelection" component={LoginSelectionScreen} />
     <Stack.Screen name="DriverLogin" component={DriverLoginScreen} />
     <Stack.Screen name="SupervisorLogin" component={SupervisorLoginScreen} />
+  </Stack.Navigator>
+);
+
+const DriverStack = ({ userProfile }) => (
+  <Stack.Navigator
+    screenOptions={{
+      headerShown: false,
+      cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+    }}
+  >
+    <Stack.Screen
+      name="DriverHome"
+      component={DriverHomeScreen}
+      initialParams={{ profile: userProfile }}
+    />
+    <Stack.Screen name="MapView" component={MapViewScreen} />
+    <Stack.Screen
+      name="ConfirmStop"
+      component={ConfirmStopScreen}
+      options={{
+        cardStyleInterpolator: CardStyleInterpolators.forFadeFromBottomAndroid,
+        presentation: "transparentModal",
+      }}
+    />
   </Stack.Navigator>
 );
 
@@ -198,18 +224,7 @@ export default function App() {
           />
         </Stack.Navigator>
       ) : (
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-          }}
-        >
-          <Stack.Screen
-            name="DriverHome"
-            component={DriverHomeScreen}
-            initialParams={{ profile: userProfile }}
-          />
-        </Stack.Navigator>
+        <DriverStack userProfile={userProfile} />
       )}
     </NavigationContainer>
   );
