@@ -46,9 +46,7 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow VateLanka to use your location for waste collection tracking."
         }
-      ],
-      "react-native-background-fetch",
-      "react-native-background-geolocation"
+      ]
     ]
   }
 }

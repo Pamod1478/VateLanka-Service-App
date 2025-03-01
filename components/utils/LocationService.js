@@ -89,7 +89,7 @@ class LocationService {
 
       const { latitude, longitude, heading, speed, timestamp } =
         location.coords;
-
+      
       let formattedTimestamp;
       try {
         formattedTimestamp = new Date(timestamp).toISOString();
@@ -105,7 +105,7 @@ class LocationService {
           longitude,
           heading: heading || 0,
           speed: speed || 0,
-          timestamp: formattedTimestamp,
+          timestamp: formattedTimestamp
         },
         lastLocationUpdate: serverTimestamp(),
       });
