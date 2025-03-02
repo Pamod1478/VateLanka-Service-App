@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   warningBox: {
-    backgroundColor: "#FFF5F5",
+    backgroundColor: COLORS.lightErrorbanner,
     padding: 10,
     borderRadius: 8,
     marginTop: 15,

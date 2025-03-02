@@ -411,10 +411,10 @@ export default function DriverHomeScreen({ route, navigation }) {
                   {
                     color:
                       routeStatus === "active"
-                        ? "#4CAF50"
+                        ? COLORS.successbanner
                         : routeStatus === "paused"
-                        ? "#FF9800"
-                        : "#9E9E9E",
+                        ? COLORS.notificationYellow
+                        : COLORS.secondary,
                   },
                 ]}
               >
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
     color: COLORS.textGray,
   },
   warningBox: {
-    backgroundColor: "#FFF5F5",
+    backgroundColor: COLORS.lightErrorbanner,
     padding: 10,
     borderRadius: 8,
     marginTop: 15,
@@ -679,13 +679,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   activeBadge: {
-    backgroundColor: "#E8F5E9",
+    backgroundColor: COLORS.lightSuccessbanner,
   },
   pausedBadge: {
-    backgroundColor: "#FFF3E0",
+    backgroundColor: COLORS.lightnotificationYellow,
   },
   inactiveBadge: {
-    backgroundColor: "#ECEFF1",
+    backgroundColor: COLORS.placeholderTextColor,
   },
   statusBadgeText: {
     fontSize: 12,
@@ -707,10 +707,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   pauseButton: {
-    backgroundColor: "#FF9800",
+    backgroundColor: COLORS.notificationYellow,
   },
   stopButton: {
-    backgroundColor: "#F44336",
+    backgroundColor: COLORS.errorbanner,
   },
   actionButtonText: {
     color: COLORS.white,
