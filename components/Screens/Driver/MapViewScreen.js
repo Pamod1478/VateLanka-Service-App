@@ -99,10 +99,10 @@ export default function MapViewScreen({ route, navigation }) {
               {
                 color:
                   routeStatus === "active"
-                    ? "#4CAF50"
+                    ? COLORS.successbanner
                     : routeStatus === "paused"
-                    ? "#FF9800"
-                    : "#9E9E9E",
+                    ? COLORS.notificationYellow
+                    : COLORS.secondary,
               },
             ]}
           >
@@ -192,18 +192,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   activeBadge: {
-    backgroundColor: "#E8F5E9",
+    backgroundColor: COLORS.lightSuccessbanner,
   },
   pausedBadge: {
-    backgroundColor: "#FFF3E0",
+    backgroundColor: COLORS.lightnotificationYellow,
   },
   inactiveBadge: {
-    backgroundColor: "#ECEFF1",
+    backgroundColor: COLORS.placeholderTextColor,
   },
   statusText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#4CAF50",
+    color: COLORS.primary,
   },
   mapContainer: {
     flex: 1,

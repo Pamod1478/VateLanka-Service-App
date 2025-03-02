@@ -24,7 +24,7 @@ export default function ConfirmStopScreen({ route, navigation }) {
         <Icon
           name="alert-triangle"
           size={50}
-          color="#FF9800"
+          color={COLORS.notificationYellow}
           style={styles.icon}
         />
         <CustomText style={styles.title}>End Route?</CustomText>
@@ -104,12 +104,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: "#F5F5F5",
+    backgroundColor: COLORS.secondary,
     borderWidth: 1,
     borderColor: COLORS.borderGray,
   },
   confirmButton: {
-    backgroundColor: "#F44336",
+    backgroundColor: COLORS.errorbanner,
   },
   cancelButtonText: {
     color: COLORS.textGray,
