@@ -198,13 +198,13 @@ export default function SupervisorHomeScreen({ route, navigation }) {
   const getTruckStatusColor = (status) => {
     switch (status) {
       case "active":
-        return "#4CAF50";
+        return COLORS.successbanner;
       case "paused":
-        return "#FF9800";
+        return COLORS.notificationYellow;
       case "completed":
-        return "#2196F3";
+        return COLORS.completed;
       default:
-        return "#9E9E9E";
+        return COLORS.textGray;
     }
   };
 
@@ -354,13 +354,17 @@ export default function SupervisorHomeScreen({ route, navigation }) {
         <View style={styles.statsGrid}>
           <View style={styles.statsRow}>
             <View style={[styles.statCard, styles.activeCard]}>
-              <Icon name="activity" size={24} color="#4CAF50" />
+              <Icon name="activity" size={24} color={COLORS.successbanner} />
               <CustomText style={styles.statValue}>{activeCount}</CustomText>
               <CustomText style={styles.statLabel}>Active</CustomText>
             </View>
 
             <View style={[styles.statCard, styles.pausedCard]}>
-              <Icon name="pause-circle" size={24} color="#FF9800" />
+              <Icon
+                name="pause-circle"
+                size={24}
+                color={COLORS.notificationYellow}
+              />
               <CustomText style={styles.statValue}>{pausedCount}</CustomText>
               <CustomText style={styles.statLabel}>Paused</CustomText>
             </View>
@@ -368,13 +372,13 @@ export default function SupervisorHomeScreen({ route, navigation }) {
 
           <View style={styles.statsRow}>
             <View style={[styles.statCard, styles.completedCard]}>
-              <Icon name="check-circle" size={24} color="#2196F3" />
+              <Icon name="check-circle" size={24} color={COLORS.completed} />
               <CustomText style={styles.statValue}>{completedCount}</CustomText>
               <CustomText style={styles.statLabel}>Completed</CustomText>
             </View>
 
             <View style={[styles.statCard, styles.inactiveCard]}>
-              <Icon name="circle" size={24} color="#9E9E9E" />
+              <Icon name="circle" size={24} color={COLORS.textGray} />
               <CustomText style={styles.statValue}>{inactiveCount}</CustomText>
               <CustomText style={styles.statLabel}>Inactive</CustomText>
             </View>
@@ -615,19 +619,19 @@ const styles = StyleSheet.create({
   },
   activeCard: {
     borderTopWidth: 3,
-    borderTopColor: "#4CAF50",
+    borderTopColor: COLORS.successbanner,
   },
   pausedCard: {
     borderTopWidth: 3,
-    borderTopColor: "#FF9800",
+    borderTopColor: COLORS.notificationYellow,
   },
   completedCard: {
     borderTopWidth: 3,
-    borderTopColor: "#2196F3",
+    borderTopColor: COLORS.completed,
   },
   inactiveCard: {
     borderTopWidth: 3,
-    borderTopColor: "#9E9E9E",
+    borderTopColor: COLORS.textGray,
   },
   statValue: {
     fontSize: 24,
@@ -788,7 +792,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   warningBox: {
-    backgroundColor: "#FFF5F5",
+    backgroundColor: COLORS.borderGray,
     padding: 10,
     borderRadius: 8,
     marginTop: 15,
