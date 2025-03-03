@@ -95,13 +95,13 @@ export default function TrucksList({ route, navigation }) {
   const getTruckStatusColor = (status) => {
     switch (status) {
       case "active":
-        return "#4CAF50";
+        return COLORS.successbanner;
       case "paused":
-        return "#FF9800";
+        return COLORS.notificationYellow;
       case "completed":
-        return "#2196F3";
+        return COLORS.completed;
       default:
-        return "#9E9E9E";
+        return COLORS.textGray;
     }
   };
 
@@ -256,7 +256,12 @@ export default function TrucksList({ route, navigation }) {
             ]}
             onPress={() => setStatusFilter("active")}
           >
-            <View style={[styles.statusDot, { backgroundColor: "#4CAF50" }]} />
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: COLORS.successbanner },
+              ]}
+            />
             <CustomText
               style={[
                 styles.filterText,
@@ -274,7 +279,12 @@ export default function TrucksList({ route, navigation }) {
             ]}
             onPress={() => setStatusFilter("paused")}
           >
-            <View style={[styles.statusDot, { backgroundColor: "#FF9800" }]} />
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: COLORS.notificationYellow },
+              ]}
+            />
             <CustomText
               style={[
                 styles.filterText,
@@ -292,7 +302,9 @@ export default function TrucksList({ route, navigation }) {
             ]}
             onPress={() => setStatusFilter("completed")}
           >
-            <View style={[styles.statusDot, { backgroundColor: "#2196F3" }]} />
+            <View
+              style={[styles.statusDot, { backgroundColor: COLORS.completed }]}
+            />
             <CustomText
               style={[
                 styles.filterText,
@@ -310,7 +322,9 @@ export default function TrucksList({ route, navigation }) {
             ]}
             onPress={() => setStatusFilter("idle")}
           >
-            <View style={[styles.statusDot, { backgroundColor: "#9E9E9E" }]} />
+            <View
+              style={[styles.statusDot, { backgroundColor: COLORS.textGray }]}
+            />
             <CustomText
               style={[
                 styles.filterText,
@@ -487,10 +501,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   trackButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: COLORS.primary,
   },
   detailsButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: COLORS.completed,
   },
   actionText: {
     color: COLORS.white,

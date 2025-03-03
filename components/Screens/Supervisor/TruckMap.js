@@ -91,13 +91,13 @@ export default function TruckMap({ route, navigation }) {
   const getTruckStatusColor = (status) => {
     switch (status) {
       case "active":
-        return "#4CAF50";
+        return COLORS.successbanner;
       case "paused":
-        return "#FF9800";
+        return COLORS.notificationYellow;
       case "completed":
-        return "#2196F3";
+        return COLORS.completed;
       default:
-        return "#9E9E9E";
+        return COLORS.textGray;
     }
   };
 
@@ -288,22 +288,36 @@ export default function TruckMap({ route, navigation }) {
         <CustomText style={styles.legendTitle}>Truck Status</CustomText>
         <View style={styles.legendItems}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: "#4CAF50" }]} />
+            <View
+              style={[
+                styles.legendDot,
+                { backgroundColor: COLORS.successbanner },
+              ]}
+            />
             <CustomText style={styles.legendText}>Active</CustomText>
           </View>
 
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: "#FF9800" }]} />
+            <View
+              style={[
+                styles.legendDot,
+                { backgroundColor: COLORS.notificationYellow },
+              ]}
+            />
             <CustomText style={styles.legendText}>Paused</CustomText>
           </View>
 
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: "#2196F3" }]} />
+            <View
+              style={[styles.legendDot, { backgroundColor: COLORS.completed }]}
+            />
             <CustomText style={styles.legendText}>Completed</CustomText>
           </View>
 
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: "#9E9E9E" }]} />
+            <View
+              style={[styles.legendDot, { backgroundColor: COLORS.textGray }]}
+            />
             <CustomText style={styles.legendText}>Inactive</CustomText>
           </View>
         </View>
@@ -429,7 +443,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   viewDetailsButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: COLORS.completed,
   },
   actionText: {
     color: COLORS.white,

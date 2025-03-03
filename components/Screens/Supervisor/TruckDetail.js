@@ -62,29 +62,29 @@ export default function TruckDetail({ route, navigation }) {
     switch (status) {
       case "active":
         return {
-          color: "#4CAF50",
-          backgroundColor: "#E8F5E9",
+          color: COLORS.label1,
+          backgroundColor: COLORS.bg1,
           text: "Active",
           icon: "play-circle",
         };
       case "paused":
         return {
-          color: "#FF9800",
-          backgroundColor: "#FFF3E0",
+          color: COLORS.label2,
+          backgroundColor: COLORS.bg2,
           text: "Paused",
           icon: "pause-circle",
         };
       case "completed":
         return {
-          color: "#2196F3",
-          backgroundColor: "#E3F2FD",
+          color: COLORS.label3,
+          backgroundColor: COLORS.bg3,
           text: "Completed",
           icon: "check-circle",
         };
       default:
         return {
-          color: "#9E9E9E",
-          backgroundColor: "#F5F5F5",
+          color: COLORS.label4,
+          backgroundColor: COLORS.bg4,
           text: "Inactive",
           icon: "circle",
         };
@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   messageButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: COLORS.completed,
   },
   actionText: {
     color: COLORS.white,
