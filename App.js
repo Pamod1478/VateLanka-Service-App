@@ -9,10 +9,18 @@ import WelcomeScreen from "./components/Screens/WelcomeScreen";
 import LoginSelectionScreen from "./components/Screens/LoginSelectionScreen";
 import DriverLoginScreen from "./components/Screens/DriverLoginScreen";
 import SupervisorLoginScreen from "./components/Screens/SupervisorLoginScreen";
+
+// Supervisor screens
 import SupervisorHomeScreen from "./components/Screens/Supervisor/SupervisorHomeScreen";
+import TruckDetail from "./components/Screens/Supervisor/TruckDetail";
+import TruckMap from "./components/Screens/Supervisor/TruckMap";
+import TrucksList from "./components/Screens/Supervisor/TrucksList";
+
+// Driver screens
 import DriverHomeScreen from "./components/Screens/Driver/DriverHomeScreen";
 import MapViewScreen from "./components/Screens/Driver/MapViewScreen";
 import ConfirmStopScreen from "./components/Screens/Driver/ConfirmStopScreen";
+
 import { auth } from "./components/utils/firebaseConfig";
 import { getProviderSession } from "./components/utils/authStorage";
 import { COLORS } from "./components/utils/Constants";
@@ -55,6 +63,24 @@ const DriverStack = ({ userProfile }) => (
         presentation: "transparentModal",
       }}
     />
+  </Stack.Navigator>
+);
+
+const SupervisorStack = ({ userProfile }) => (
+  <Stack.Navigator
+    screenOptions={{
+      headerShown: false,
+      cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+    }}
+  >
+    <Stack.Screen
+      name="SupervisorHome"
+      component={SupervisorHomeScreen}
+      initialParams={{ profile: userProfile }}
+    />
+    <Stack.Screen name="TruckDetail" component={TruckDetail} />
+    <Stack.Screen name="TruckMap" component={TruckMap} />
+    <Stack.Screen name="TrucksList" component={TrucksList} />
   </Stack.Navigator>
 );
 
@@ -211,18 +237,7 @@ export default function App() {
       {!user ? (
         <AuthStack />
       ) : userType === "supervisor" ? (
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-          }}
-        >
-          <Stack.Screen
-            name="SupervisorHome"
-            component={SupervisorHomeScreen}
-            initialParams={{ profile: userProfile }}
-          />
-        </Stack.Navigator>
+        <SupervisorStack userProfile={userProfile} />
       ) : (
         <DriverStack userProfile={userProfile} />
       )}
