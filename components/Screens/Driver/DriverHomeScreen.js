@@ -50,6 +50,7 @@ export default function DriverHomeScreen({ route, navigation }) {
     return () => clearTimeout(timer);
   }, [loading]);
 
+  // In DriverHomeScreen.js, modify the location-related useEffect:
   useEffect(() => {
     updateGreeting();
     if (profile.driverName) {
@@ -72,11 +73,14 @@ export default function DriverHomeScreen({ route, navigation }) {
       );
     }
 
-    (async () => {
+    // Add a delay before requesting location permissions
+    const timer = setTimeout(async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status === "granted") {
-          const location = await Location.getCurrentPositionAsync({});
+          const location = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced, // Lower accuracy for faster result
+          });
           setCurrentLocation({
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
@@ -84,8 +88,11 @@ export default function DriverHomeScreen({ route, navigation }) {
         }
       } catch (error) {
         console.error("Error getting initial location:", error);
+        // Don't crash if location fails
       }
-    })();
+    }, 1500); // Shorter delay to keep responsiveness
+
+    return () => clearTimeout(timer);
   }, [profile]);
 
   useEffect(() => {
@@ -246,6 +253,20 @@ export default function DriverHomeScreen({ route, navigation }) {
     });
   };
 
+  const isValidLocation = (loc) => {
+    return (
+      loc &&
+      typeof loc.latitude === "number" &&
+      typeof loc.longitude === "number" &&
+      !isNaN(loc.latitude) &&
+      !isNaN(loc.longitude) &&
+      loc.latitude >= -90 &&
+      loc.latitude <= 90 &&
+      loc.longitude >= -180 &&
+      loc.longitude <= 180
+    );
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -341,7 +362,7 @@ export default function DriverHomeScreen({ route, navigation }) {
           )}
         </View>
 
-        {currentLocation && (
+        {currentLocation && isValidLocation(currentLocation) && (
           <View style={styles.mapPreviewContainer}>
             <View style={styles.mapThumbnail}>
               <MapView

@@ -1,4 +1,3 @@
-import { auth, firestore } from "../utils/firebaseConfig";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import {
   doc,
@@ -12,8 +11,11 @@ import {
   saveProviderSession,
   clearProviderSession,
 } from "../utils/authStorage";
+import { auth, firestore, ensureInitialized } from "../utils/firebaseConfig";
 
 export const loginSupervisor = async (supervisorId, password) => {
+  // At the beginning of loginSupervisor and loginDriver functions:
+  await ensureInitialized();
   try {
     if (!supervisorId.startsWith("SUP")) {
       throw new Error("Invalid supervisor ID format");
@@ -76,6 +78,7 @@ export const loginSupervisor = async (supervisorId, password) => {
 };
 
 export const loginDriver = async (truckId, password) => {
+  await ensureInitialized();
   try {
     if (!truckId.startsWith("TRUCK")) {
       throw new Error("Invalid truck ID format");

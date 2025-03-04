@@ -42,31 +42,32 @@ export default function SupervisorLoginScreen({ navigation }) {
       );
       return;
     }
-
+  
     try {
       setLoading(true);
       const result = await loginSupervisor(
         supervisorId.trim().toUpperCase(),
         password
       );
-
+  
       showNotification("Login successful!", "success");
-
-      setTimeout(async () => {
-        const session = await getProviderSession();
-        if (session) {
-          console.log("Session verified before navigation");
-        } else {
-          console.log("Session not yet available, waiting longer...");
-          setTimeout(async () => {
-            const retrySession = await getProviderSession();
-            console.log(
-              "Final session check:",
-              retrySession ? "Session found" : "No session"
-            );
-          }, 1000);
-        }
-      }, 1500);
+  
+      // Remove the timeout and session checking code below
+      // setTimeout(async () => {
+      //   const session = await getProviderSession();
+      //   if (session) {
+      //     console.log("Session verified before navigation");
+      //   } else {
+      //     console.log("Session not yet available, waiting longer...");
+      //     setTimeout(async () => {
+      //       const retrySession = await getProviderSession();
+      //       console.log(
+      //         "Final session check:",
+      //         retrySession ? "Session found" : "No session"
+      //       );
+      //     }, 1000);
+      //   }
+      // }, 1500);
     } catch (error) {
       showNotification(error.message || "Invalid credentials", "error");
     } finally {

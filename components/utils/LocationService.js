@@ -54,7 +54,13 @@ class LocationService {
 
   async startRoute() {
     try {
-      await this.requestPermissions();
+      let permResult;
+      try {
+        permResult = await this.requestPermissions();
+      } catch (permError) {
+        console.error("Permission request error:", permError);
+        permResult = { foregroundStatus: "denied", backgroundStatus: "denied" };
+      }
 
       const truckRef = this.getTruckDocRef();
       await updateDoc(truckRef, {
@@ -64,20 +70,44 @@ class LocationService {
 
       this.routeStatus = "active";
 
-      this.watchId = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          distanceInterval: 10,
-          timeInterval: 2000,
-        },
-        this.updateLocation.bind(this)
-      );
+      // Only set up location tracking if permissions granted
+      if (permResult.foregroundStatus === "granted") {
+        try {
+          this.watchId = await Location.watchPositionAsync(
+            {
+              accuracy: Location.Accuracy.High,
+              distanceInterval: 10,
+              timeInterval: 2000,
+            },
+            this.updateLocation.bind(this)
+          );
+          this.isTracking = true;
+        } catch (watchError) {
+          console.error("Error watching position:", watchError);
+          // Still continue with active status even if watching fails
+        }
+      } else {
+        console.log(
+          "Location permission not granted, route active without tracking"
+        );
+      }
 
-      this.isTracking = true;
       return true;
     } catch (error) {
       console.error("Error starting route tracking:", error);
-      throw error;
+      // Try to recover by at least updating status
+      try {
+        const truckRef = this.getTruckDocRef();
+        await updateDoc(truckRef, {
+          routeStatus: "active",
+          lastLocationUpdate: serverTimestamp(),
+        });
+        this.routeStatus = "active";
+        return true;
+      } catch (innerError) {
+        console.error("Failed to update route status:", innerError);
+        throw error;
+      }
     }
   }
 
@@ -89,7 +119,7 @@ class LocationService {
 
       const { latitude, longitude, heading, speed, timestamp } =
         location.coords;
-      
+
       let formattedTimestamp;
       try {
         formattedTimestamp = new Date(timestamp).toISOString();
@@ -105,7 +135,7 @@ class LocationService {
           longitude,
           heading: heading || 0,
           speed: speed || 0,
-          timestamp: formattedTimestamp
+          timestamp: formattedTimestamp,
         },
         lastLocationUpdate: serverTimestamp(),
       });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, TouchableOpacity } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import {
   createStackNavigator,
@@ -24,6 +24,7 @@ import ConfirmStopScreen from "./components/Screens/Driver/ConfirmStopScreen";
 import { auth } from "./components/utils/firebaseConfig";
 import { getProviderSession } from "./components/utils/authStorage";
 import { COLORS } from "./components/utils/Constants";
+import CustomText from "./components/utils/CustomText";
 import "react-native-gesture-handler";
 
 const Stack = createStackNavigator();
@@ -85,11 +86,71 @@ const SupervisorStack = ({ userProfile }) => (
 );
 
 export default function App() {
-  const [initializing, setInitializing] = React.useState(true);
-  const [user, setUser] = React.useState(null);
-  const [userType, setUserType] = React.useState(null);
-  const [userProfile, setUserProfile] = React.useState(null);
-  const [forceUpdate, setForceUpdate] = React.useState(0);
+  const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState(null);
+  const [userType, setUserType] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [forceUpdate, setForceUpdate] = useState(0);
+  // Add error handling state
+  const [hasError, setHasError] = useState(false);
+
+  // Add global error handler
+  // Replace this section of code
+  useEffect(() => {
+    const errorHandler = (error, isFatal) => {
+      if (isFatal) {
+        console.error("FATAL ERROR:", error);
+        setHasError(true);
+      } else {
+        console.error("NON-FATAL ERROR:", error);
+      }
+    };
+
+    // Use React Native's global error handler instead
+    if (__DEV__) {
+      const originalGlobalHandler = global.ErrorUtils.getGlobalHandler();
+      global.ErrorUtils.setGlobalHandler((error, isFatal) => {
+        errorHandler(error, isFatal);
+        originalGlobalHandler(error, isFatal);
+      });
+
+      return () => {
+        global.ErrorUtils.setGlobalHandler(originalGlobalHandler);
+      };
+    }
+
+    return () => {};
+  }, []);
+
+  // Error UI render
+  if (hasError) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 20,
+        }}
+      >
+        <CustomText
+          style={{ fontSize: 18, marginBottom: 20, textAlign: "center" }}
+        >
+          Something went wrong. Please restart the app.
+        </CustomText>
+        <TouchableOpacity
+          style={{
+            padding: 12,
+            backgroundColor: COLORS.primary,
+            borderRadius: 8,
+          }}
+          onPress={() => setHasError(false)}
+        >
+          <CustomText style={{ color: COLORS.white }}>Try Again</CustomText>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -97,7 +158,7 @@ export default function App() {
         console.log("Force ending initialization after timeout");
         setInitializing(false);
       }
-    }, 5000);
+    }, 8000); // Increased from 5000 to 8000
 
     return () => clearTimeout(timeoutId);
   }, [initializing]);
@@ -158,7 +219,10 @@ export default function App() {
       }
     };
 
-    initializeAuth();
+    // Ensure initialization completes even if there's an error
+    initializeAuth().catch(() => {
+      setInitializing(false);
+    });
 
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       console.log(

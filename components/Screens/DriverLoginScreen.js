@@ -33,6 +33,7 @@ export default function DriverLoginScreen({ navigation }) {
     });
   };
 
+  // In DriverLoginScreen.js, modify handleLogin:
   const handleLogin = async () => {
     if (!truckId || !password) {
       showNotification("Please enter both Truck ID and password.", "error");
@@ -43,17 +44,21 @@ export default function DriverLoginScreen({ navigation }) {
       setLoading(true);
       const result = await loginDriver(truckId.trim().toUpperCase(), password);
 
+      // Keep the success notification
       showNotification("Login successful!", "success");
 
-      setTimeout(() => {
-        navigation.navigate("Welcome");
-      }, 1000);
+      // Remove the navigation, let App.js handle it
+      // setTimeout(() => {
+      //   navigation.navigate("Welcome");
+      // }, 1000);
     } catch (error) {
       showNotification(error.message || "Invalid credentials", "error");
     } finally {
       setLoading(false);
     }
   };
+
+  // Apply similar change to SupervisorLoginScreen.js
 
   return (
     <KeyboardAvoidingView
