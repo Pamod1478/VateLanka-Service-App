@@ -21,15 +21,13 @@ export const auth = initializeAuth(app, {
 
 export const firestore = getFirestore(app);
 
-// Add initialization check
 let initialized = false;
 
 export const ensureInitialized = async () => {
   if (initialized) return true;
-  
+
   try {
-    // Small delay to ensure Firebase has time to initialize
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
     initialized = true;
     return true;
   } catch (error) {

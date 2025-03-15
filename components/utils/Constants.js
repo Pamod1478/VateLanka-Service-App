@@ -25,5 +25,5 @@ export const COLORS = {
   label1: "#4CAF50",
   label2: "#FF9800",
   label3: "#2196F3",
-  label4: "#9E9E9E",
+  label4: "#9E9E9E",
 };

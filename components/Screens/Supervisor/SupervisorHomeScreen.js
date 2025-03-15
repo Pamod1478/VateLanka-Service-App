@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Alert,
   Dimensions,
+  Image,
 } from "react-native";
 import { COLORS } from "../../utils/Constants";
 import CustomText from "../../utils/CustomText";
@@ -235,20 +236,10 @@ export default function SupervisorHomeScreen({ route, navigation }) {
         description={truck.numberPlate || truck.id}
         onPress={() => handleTruckPress(truck)}
       >
-        <View
-          style={[
-            styles.markerContainer,
-            {
-              borderColor: getTruckStatusColor(truck.routeStatus),
-            },
-          ]}
-        >
-          <Icon
-            name="truck"
-            size={16}
-            color={getTruckStatusColor(truck.routeStatus)}
-          />
-        </View>
+        <Image
+          source={require("../../ApplicationAssets/truck-icon.png")}
+          style={styles.markerImage}
+        />
       </Marker>
     );
   };
@@ -702,11 +693,10 @@ const styles = StyleSheet.create({
     color: COLORS.textGray,
     textAlign: "center",
   },
-  markerContainer: {
-    backgroundColor: COLORS.white,
-    borderRadius: 20,
-    padding: 6,
-    borderWidth: 2,
+  markerImage: {
+    width: 32,
+    height: 32,
+    resizeMode: "contain",
   },
   trucksListCard: {
     backgroundColor: COLORS.white,

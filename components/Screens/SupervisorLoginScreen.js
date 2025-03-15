@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -9,22 +9,58 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Keyboard,
+  BackHandler,
 } from "react-native";
 import { COLORS } from "../utils/Constants";
 import CustomText from "../utils/CustomText";
 import { loginSupervisor } from "../services/firebaseAuth";
-import { getProviderSession } from "../utils/authStorage";
 import NotificationBanner from "../utils/NotificationBanner";
 
 export default function SupervisorLoginScreen({ navigation }) {
   const [supervisorId, setSupervisorId] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [notification, setNotification] = useState({
     visible: false,
     message: "",
     type: "success",
   });
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        if (loading) {
+          return true;
+        }
+        return false;
+      }
+    );
+
+    return () => backHandler.remove();
+  }, [loading]);
 
   const showNotification = (message, type) => {
     setNotification({
@@ -35,43 +71,49 @@ export default function SupervisorLoginScreen({ navigation }) {
   };
 
   const handleLogin = async () => {
-    if (!supervisorId || !password) {
+    Keyboard.dismiss();
+
+    if (!supervisorId) {
+      showNotification("Please enter your Supervisor ID", "error");
+      return;
+    }
+
+    if (!password) {
+      showNotification("Please enter your password", "error");
+      return;
+    }
+
+    const formattedSupervisorId = supervisorId.trim().toUpperCase();
+    if (!formattedSupervisorId.startsWith("SUP")) {
       showNotification(
-        "Please enter both Supervisor ID and password.",
+        "Invalid Supervisor ID format. ID should start with 'SUP'",
         "error"
       );
       return;
     }
-  
+
     try {
       setLoading(true);
-      const result = await loginSupervisor(
-        supervisorId.trim().toUpperCase(),
-        password
-      );
-  
+
+      const result = await loginSupervisor(formattedSupervisorId, password);
+
       showNotification("Login successful!", "success");
-  
-      // Remove the timeout and session checking code below
-      // setTimeout(async () => {
-      //   const session = await getProviderSession();
-      //   if (session) {
-      //     console.log("Session verified before navigation");
-      //   } else {
-      //     console.log("Session not yet available, waiting longer...");
-      //     setTimeout(async () => {
-      //       const retrySession = await getProviderSession();
-      //       console.log(
-      //         "Final session check:",
-      //         retrySession ? "Session found" : "No session"
-      //       );
-      //     }, 1000);
-      //   }
-      // }, 1500);
+
+      setTimeout(() => {
+        setLoading(false);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "MainApp" }],
+        });
+      }, 1500);
     } catch (error) {
-      showNotification(error.message || "Invalid credentials", "error");
-    } finally {
+      console.error("Login error:", error);
       setLoading(false);
+
+      showNotification(
+        error.message || "Login failed. Please try again.",
+        "error"
+      );
     }
   };
 
@@ -129,16 +171,11 @@ export default function SupervisorLoginScreen({ navigation }) {
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.9}
-            style={styles.backButton}
-            disabled={loading}
-          >
-            <CustomText style={styles.backButtonText}>
-              Back to Selection
+          <View style={styles.helpTextContainer}>
+            <CustomText style={styles.helpText}>
+              If you're having trouble logging in, please contact support.
             </CustomText>
-          </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -206,11 +243,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  backButton: {
+  helpTextContainer: {
     alignItems: "center",
   },
-  backButtonText: {
-    color: COLORS.primary,
+  helpText: {
     fontSize: 14,
+    color: COLORS.primary,
+    textAlign: "center",
   },
 });

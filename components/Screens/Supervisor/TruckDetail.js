@@ -36,26 +36,32 @@ export default function TruckDetail({ route, navigation }) {
       return () => {};
     }
 
-    const truckRef = doc(
-      firestore,
-      `municipalCouncils/${truck.municipalCouncil}/Districts/${truck.district}/Wards/${truck.ward}/supervisors/${truck.supervisorId}/trucks/${truck.id}`
-    );
+    try {
+      const truckRef = doc(
+        firestore,
+        `municipalCouncils/${truck.municipalCouncil}/Districts/${truck.district}/Wards/${truck.ward}/supervisors/${truck.supervisorId}/trucks/${truck.id}`
+      );
 
-    const unsubscribe = onSnapshot(
-      truckRef,
-      (snapshot) => {
-        if (snapshot.exists()) {
-          setTruck({ ...snapshot.data(), id: snapshot.id });
+      const unsubscribe = onSnapshot(
+        truckRef,
+        (snapshot) => {
+          if (snapshot.exists()) {
+            setTruck({ ...snapshot.data(), id: snapshot.id });
+          }
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Error subscribing to truck updates:", error);
+          setLoading(false);
         }
-        setLoading(false);
-      },
-      (error) => {
-        console.error("Error subscribing to truck updates:", error);
-        setLoading(false);
-      }
-    );
+      );
 
-    return unsubscribe;
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error setting up truck subscription:", error);
+      setLoading(false);
+      return () => {};
+    }
   }, [truck.id, truck.supervisorId]);
 
   const getRouteStatusInfo = (status) => {
@@ -152,7 +158,7 @@ export default function TruckDetail({ route, navigation }) {
     }
   };
 
-  const routeStatus = getRouteStatusInfo(truck.routeStatus);
+  const routeStatus = getRouteStatusInfo(truck.routeStatus || "idle");
 
   return (
     <SafeAreaView style={styles.container}>
@@ -211,7 +217,11 @@ export default function TruckDetail({ route, navigation }) {
                     style={{ marginRight: 4 }}
                   />
                   <CustomText
-                    style={[styles.statusText, { color: routeStatus.color }]}
+                    style={{
+                      fontSize: 12,
+                      fontWeight: "600",
+                      color: routeStatus.color,
+                    }}
                   >
                     {routeStatus.text}
                   </CustomText>
@@ -293,16 +303,10 @@ export default function TruckDetail({ route, navigation }) {
                     title={truck.driverName || "Driver"}
                     description={truck.numberPlate || truck.id}
                   >
-                    <View
-                      style={[
-                        styles.markerContainer,
-                        {
-                          borderColor: routeStatus.color,
-                        },
-                      ]}
-                    >
-                      <Icon name="truck" size={16} color={routeStatus.color} />
-                    </View>
+                    <Image
+                      source={require("../../ApplicationAssets/truck-icon.png")}
+                      style={styles.markerImage}
+                    />
                   </Marker>
                 </MapView>
 
@@ -464,10 +468,11 @@ export default function TruckDetail({ route, navigation }) {
                   ]}
                 >
                   <CustomText
-                    style={[
-                      styles.statusPillText,
-                      { color: routeStatus.color },
-                    ]}
+                    style={{
+                      fontSize: 12,
+                      fontWeight: "600",
+                      color: routeStatus.color,
+                    }}
                   >
                     {routeStatus.text}
                   </CustomText>
@@ -554,10 +559,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderWidth: 1,
-  },
-  statusText: {
-    fontSize: "12",
-    fontWeight: "600",
   },
   truckDetailsRow: {
     flexDirection: "row",
@@ -666,11 +667,10 @@ const styles = StyleSheet.create({
     color: COLORS.textGray,
     flex: 1,
   },
-  markerContainer: {
-    backgroundColor: COLORS.white,
-    borderRadius: 20,
-    padding: 6,
-    borderWidth: 2,
+  markerImage: {
+    width: 32,
+    height: 32,
+    resizeMode: "contain",
   },
   detailsCard: {
     backgroundColor: COLORS.white,
@@ -707,9 +707,5 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 2,
-  },
-  statusPillText: {
-    fontSize: 12,
-    fontWeight: "600",
   },
 });

@@ -15,7 +15,7 @@ export default function WelcomeScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <CustomText style={styles.welcomeText}>Welcome!</CustomText>
-        <CustomText style={styles.subtitle}>Service Provider Portal</CustomText>
+        <CustomText style={styles.subtitle}>How are you today?</CustomText>
       </View>
 
       <View style={styles.logoContainer}>
@@ -23,16 +23,16 @@ export default function WelcomeScreen({ navigation }) {
           source={require("../ApplicationAssets/logo.png")}
           style={styles.logo}
         />
-        <CustomText style={styles.tagline}>For a Cleaner Sri Lanka</CustomText>
+        <CustomText style={styles.tagline}>Supervisor Portal</CustomText>
       </View>
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("LoginSelection")}
+        onPress={() => navigation.navigate("SupervisorLogin")}
         activeOpacity={0.9}
       >
         <View style={styles.buttonContent}>
-          <CustomText style={styles.buttonText}>Get Started</CustomText>
+          <CustomText style={styles.buttonText}>Login</CustomText>
           <Feather name="arrow-right" style={styles.icon} />
         </View>
       </TouchableOpacity>
