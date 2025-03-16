@@ -19,6 +19,7 @@ import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import { subscribeToSupervisorTrucks } from "../../services/firebaseFirestore";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import NotificationBanner from "../../utils/NotificationBanner";
+import { makePhoneCall } from "../../utils/phoneUtils";
 
 export default function SupervisorHomeScreen({ route, navigation }) {
   const profile = route?.params?.profile || {};
@@ -188,12 +189,12 @@ export default function SupervisorHomeScreen({ route, navigation }) {
 
   const handleCallDriver = (truck) => {
     const phoneNumber = truck.phoneNumber || "";
-    if (!phoneNumber) {
-      showNotification("Driver phone number not available", "error");
-      return;
-    }
 
-    showNotification(`Calling driver: ${truck.driverName}`, "success");
+    makePhoneCall(
+      phoneNumber,
+      () => showNotification(`Calling driver: ${truck.driverName}`, "success"),
+      (errorMsg) => showNotification(errorMsg, "error")
+    );
   };
 
   const getTruckStatusColor = (status) => {
