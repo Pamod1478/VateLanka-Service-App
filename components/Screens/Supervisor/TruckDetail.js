@@ -17,6 +17,7 @@ import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import NotificationBanner from "../../utils/NotificationBanner";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { doc, onSnapshot } from "firebase/firestore";
+import { makePhoneCall, sendTextMessage } from "../../utils/phoneUtils";
 import { firestore } from "../../utils/firebaseConfig";
 
 export default function TruckDetail({ route, navigation }) {
@@ -98,45 +99,20 @@ export default function TruckDetail({ route, navigation }) {
   };
 
   const handleCallDriver = () => {
-    if (!truck.phoneNumber) {
-      showNotification("Phone number not available", "error");
-      return;
-    }
-
-    const formattedNumber = `tel:${truck.phoneNumber}`;
-    Linking.canOpenURL(formattedNumber)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(formattedNumber);
-        } else {
-          showNotification("Cannot make calls from this device", "error");
-        }
-      })
-      .catch((error) => {
-        showNotification("Error initiating call", "error");
-        console.error("Error making phone call:", error);
-      });
+    makePhoneCall(
+      truck.phoneNumber,
+      () => showNotification(`Calling driver: ${truck.driverName}`, "success"),
+      (errorMsg) => showNotification(errorMsg, "error")
+    );
   };
 
   const handleSendMessage = () => {
-    if (!truck.phoneNumber) {
-      showNotification("Phone number not available", "error");
-      return;
-    }
-
-    const formattedNumber = `sms:${truck.phoneNumber}`;
-    Linking.canOpenURL(formattedNumber)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(formattedNumber);
-        } else {
-          showNotification("Cannot send messages from this device", "error");
-        }
-      })
-      .catch((error) => {
-        showNotification("Error sending message", "error");
-        console.error("Error sending message:", error);
-      });
+    sendTextMessage(
+      truck.phoneNumber,
+      () =>
+        showNotification(`Sending message to: ${truck.driverName}`, "success"),
+      (errorMsg) => showNotification(errorMsg, "error")
+    );
   };
 
   const showNotification = (message, type = "error") => {
