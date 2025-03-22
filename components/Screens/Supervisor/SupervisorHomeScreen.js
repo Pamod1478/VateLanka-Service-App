@@ -13,13 +13,24 @@ import {
 } from "react-native";
 import { COLORS } from "../../utils/Constants";
 import CustomText from "../../utils/CustomText";
-import { logout } from "../../services/firebaseAuth";
 import Icon from "react-native-vector-icons/Feather";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
+import NotificationBanner from "../../utils/NotificationBanner";
+import { firestore } from "../../utils/firebaseConfig";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  getDocs,
+  orderBy,
+} from "firebase/firestore";
 import { subscribeToSupervisorTrucks } from "../../services/firebaseFirestore";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
-import NotificationBanner from "../../utils/NotificationBanner";
 import { makePhoneCall } from "../../utils/phoneUtils";
+import { logout } from "../../services/firebaseAuth";
+
+const { width, height } = Dimensions.get("window");
 
 export default function SupervisorHomeScreen({ route, navigation }) {
   const profile = route?.params?.profile || {};
@@ -32,6 +43,7 @@ export default function SupervisorHomeScreen({ route, navigation }) {
   const [activeTrucks, setActiveTrucks] = useState([]);
   const [mapRegion, setMapRegion] = useState(null);
   const [selectedTruck, setSelectedTruck] = useState(null);
+  const [pendingTickets, setPendingTickets] = useState([]);
   const [notification, setNotification] = useState({
     visible: false,
     message: "",
@@ -95,6 +107,56 @@ export default function SupervisorHomeScreen({ route, navigation }) {
       });
     }
   }, [trucks]);
+
+  useEffect(() => {
+    const fetchPendingTickets = async () => {
+      try {
+        if (!profile.municipalCouncil || !profile.district || !profile.ward) {
+          console.log("Missing required profile data for tickets query");
+          return;
+        }
+
+        const ticketsRef = collection(
+          firestore,
+          `municipalCouncils/${profile.municipalCouncil}/Districts/${profile.district}/Wards/${profile.ward}/tickets`
+        );
+
+        const q = query(
+          ticketsRef,
+          where("status", "==", "pending"),
+          orderBy("createdAt", "desc")
+        );
+
+        const unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            const tickets = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+              createdAt: doc.data().createdAt?.toDate(),
+            }));
+
+            setPendingTickets(tickets);
+          },
+          (error) => {
+            console.error("Error fetching pending tickets:", error);
+          }
+        );
+
+        return unsubscribe;
+      } catch (error) {
+        console.error("Error setting up tickets query:", error);
+        return () => {};
+      }
+    };
+
+    const unsubscribe = fetchPendingTickets();
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
+  }, [profile]);
 
   const fetchData = () => {
     try {
@@ -223,6 +285,28 @@ export default function SupervisorHomeScreen({ route, navigation }) {
     }
   };
 
+  const formatTimeAgo = (timestamp) => {
+    if (!timestamp) return "";
+
+    const now = new Date();
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+    const seconds = Math.floor((now - date) / 1000);
+
+    if (seconds < 60) return "just now";
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}d ago`;
+
+    const months = Math.floor(days / 30);
+    return `${months}mo ago`;
+  };
+
   const renderTruckMarker = (truck) => {
     if (!truck.currentLocation) return null;
 
@@ -329,6 +413,23 @@ export default function SupervisorHomeScreen({ route, navigation }) {
             </View>
           </View>
 
+          {pendingTickets.length > 0 && (
+            <TouchableOpacity
+              style={styles.notificationBadge}
+              onPress={() => navigation.navigate("TicketsList", { profile })}
+            >
+              <Icon name="bell" size={20} color={COLORS.white} />
+              <View style={styles.badgeCounter}>
+                <CustomText style={styles.badgeCounterText}>
+                  {pendingTickets.length > 99 ? "99+" : pendingTickets.length}
+                </CustomText>
+              </View>
+              <CustomText style={styles.notificationText}>
+                Pending Tickets
+              </CustomText>
+            </TouchableOpacity>
+          )}
+
           {loadingTimeout && (
             <View style={styles.warningBox}>
               <Icon
@@ -375,6 +476,93 @@ export default function SupervisorHomeScreen({ route, navigation }) {
               <CustomText style={styles.statLabel}>Inactive</CustomText>
             </View>
           </View>
+        </View>
+
+        <View style={styles.ticketsListCard}>
+          <View style={styles.cardHeader}>
+            <Icon name="alert-circle" size={20} color={COLORS.primary} />
+            <CustomText style={styles.cardTitle}>Recent Tickets</CustomText>
+
+            <TouchableOpacity
+              style={styles.viewAllButton}
+              onPress={() => navigation.navigate("TicketsList", { profile })}
+            >
+              <CustomText style={styles.viewAllText}>View All</CustomText>
+              <Icon name="chevron-right" size={16} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+
+          {loading ? (
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          ) : pendingTickets.length === 0 ? (
+            <View style={styles.emptyTicketsContainer}>
+              <Icon name="inbox" size={24} color={COLORS.textGray} />
+              <CustomText style={styles.emptyTicketsText}>
+                No pending tickets at the moment
+              </CustomText>
+            </View>
+          ) : (
+            pendingTickets.slice(0, 2).map((ticket) => (
+              <TouchableOpacity
+                key={ticket.id}
+                style={styles.ticketItem}
+                onPress={() =>
+                  navigation.navigate("TicketDetail", { ticket, profile })
+                }
+              >
+                <View style={styles.ticketHeader}>
+                  <View style={styles.ticketTypeContainer}>
+                    <CustomText style={styles.ticketType}>
+                      {ticket.issueType}
+                    </CustomText>
+                    <CustomText style={styles.ticketTime}>
+                      {formatTimeAgo(ticket.createdAt)}
+                    </CustomText>
+                  </View>
+                  <View
+                    style={[
+                      styles.ticketStatusBadge,
+                      { backgroundColor: COLORS.notificationYellow + "20" },
+                    ]}
+                  >
+                    <CustomText
+                      style={[
+                        styles.ticketStatusText,
+                        { color: COLORS.notificationYellow },
+                      ]}
+                    >
+                      Pending
+                    </CustomText>
+                  </View>
+                </View>
+                <View style={styles.ticketDetails}>
+                  <View style={styles.ticketDetailRow}>
+                    <Icon name="user" size={14} color={COLORS.textGray} />
+                    <CustomText style={styles.ticketDetailText}>
+                      {ticket.userName || "Anonymous"}
+                    </CustomText>
+                  </View>
+                  <View style={styles.ticketDetailRow}>
+                    <Icon name="trash-2" size={14} color={COLORS.textGray} />
+                    <CustomText style={styles.ticketDetailText}>
+                      {ticket.wasteType}
+                    </CustomText>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
+
+          {pendingTickets.length > 2 && (
+            <TouchableOpacity
+              style={styles.showMoreButton}
+              onPress={() => navigation.navigate("TicketsList", { profile })}
+            >
+              <CustomText style={styles.showMoreText}>
+                Show {pendingTickets.length - 2} more tickets
+              </CustomText>
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.mapCard}>
@@ -588,6 +776,35 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textGray,
   },
+  notificationBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.notificationYellow,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 25,
+    marginTop: 15,
+    alignSelf: "flex-start",
+  },
+  badgeCounter: {
+    backgroundColor: COLORS.white,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 6,
+  },
+  badgeCounterText: {
+    color: COLORS.notificationYellow,
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  notificationText: {
+    color: COLORS.white,
+    fontWeight: "600",
+    fontSize: 14,
+  },
   statsGrid: {
     marginBottom: 20,
   },
@@ -634,6 +851,73 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 14,
     color: COLORS.textGray,
+  },
+  ticketsListCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  emptyTicketsContainer: {
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyTicketsText: {
+    fontSize: 14,
+    color: COLORS.textGray,
+    marginTop: 8,
+    textAlign: "center",
+  },
+  ticketItem: {
+    backgroundColor: COLORS.secondary,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+  },
+  ticketHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 8,
+  },
+  ticketTypeContainer: {
+    flex: 1,
+  },
+  ticketType: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.black,
+    marginBottom: 2,
+  },
+  ticketTime: {
+    fontSize: 12,
+    color: COLORS.textGray,
+  },
+  ticketStatusBadge: {
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  ticketStatusText: {
+    fontSize: 10,
+    fontWeight: "600",
+  },
+  ticketDetails: {
+    gap: 5,
+  },
+  ticketDetailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  ticketDetailText: {
+    fontSize: 12,
+    color: COLORS.textGray,
+    marginLeft: 6,
   },
   mapCard: {
     backgroundColor: COLORS.white,
