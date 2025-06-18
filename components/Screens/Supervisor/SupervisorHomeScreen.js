@@ -715,6 +715,24 @@ export default function SupervisorHomeScreen({ route, navigation }) {
             </TouchableOpacity>
           </View>
 
+          </View>
+
+        <View style={styles.StockCard}>
+          <View style={styles.cardHeader}>
+            <Icon name="phone" size={20} color={COLORS.primary} />
+            <CustomText style={styles.cardTitle}>
+              Contact US
+            </CustomText>
+
+            <TouchableOpacity
+              style={styles.viewAllButton}
+              onPress={() => navigation.navigate("ContactUS")}
+            >
+              <CustomText style={styles.viewAllText}>Click here</CustomText>
+              <Icon name="chevron-right" size={16} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+
         </View>
       </ScrollView>
     </SafeAreaView>
