@@ -15,6 +15,7 @@ import TrucksList from "./components/Screens/Supervisor/TrucksList";
 import TicketsListScreen from "./components/Screens/Supervisor/TicketsListScreen";
 import TicketDetailScreen from "./components/Screens/Supervisor/TicketDetailScreen";
 import AssignTicketScreen from "./components/Screens/Supervisor/AssignTicketScreen";
+import Stocks from "./components/Screens/Supervisor/Stocks";
 
 import { auth } from "./components/utils/firebaseConfig";
 import { getProviderSession } from "./components/utils/authStorage";
@@ -54,6 +55,7 @@ const SupervisorStack = ({ userProfile }) => (
     <Stack.Screen name="TicketsList" component={TicketsListScreen} />
     <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
     <Stack.Screen name="AssignTicket" component={AssignTicketScreen} />
+     <Stack.Screen name="Stocks" component={Stocks} />
   </Stack.Navigator>
 );
 
