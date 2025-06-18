@@ -605,6 +605,8 @@ export default function SupervisorHomeScreen({ route, navigation }) {
             )}
           </View>
 
+          
+
           <CustomText style={styles.mapFooter}>
             {activeTrucks.length} active trucks on duty
           </CustomText>
@@ -692,7 +694,27 @@ export default function SupervisorHomeScreen({ route, navigation }) {
                 </TouchableOpacity>
               )}
             </View>
+
+            
           )}
+        </View>
+
+        <View style={styles.StockCard}>
+          <View style={styles.cardHeader}>
+            <Icon name="package" size={20} color={COLORS.primary} />
+            <CustomText style={styles.cardTitle}>
+              Stocks
+            </CustomText>
+
+            <TouchableOpacity
+              style={styles.viewAllButton}
+              onPress={() => navigation.navigate("Stocks")}
+            >
+              <CustomText style={styles.viewAllText}>View All</CustomText>
+              <Icon name="chevron-right" size={16} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -1080,5 +1102,16 @@ const styles = StyleSheet.create({
     color: COLORS.errorbanner,
     fontSize: 12,
     marginLeft: 8,
+  },
+  StockCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 });
