@@ -26,12 +26,14 @@ const Stocks = () => {
         quantity,
       };
       setEntries((prevEntries) => [...prevEntries, newEntry]);
-
-      // Clear inputs
       setTractorNumber("");
       setMaterial("");
       setQuantity("");
     }
+  };
+
+  const handleDelete = (id) => {
+    setEntries((prevEntries) => prevEntries.filter((entry) => entry.id !== id));
   };
 
   const renderItem = ({ item }) => (
@@ -39,6 +41,9 @@ const Stocks = () => {
       <CustomText style={styles.tableCell}>{item.tractorNumber}</CustomText>
       <CustomText style={styles.tableCell}>{item.material}</CustomText>
       <CustomText style={styles.tableCell}>{item.quantity}</CustomText>
+      <TouchableOpacity onPress={() => handleDelete(item.id)}>
+        <CustomText style={styles.deleteText}>🗑️</CustomText>
+      </TouchableOpacity>
     </View>
   );
 
@@ -47,7 +52,7 @@ const Stocks = () => {
       <ScrollView contentContainerStyle={styles.content}>
         <CustomText style={styles.heading}>Stocks Page</CustomText>
 
-        {/* Form Section */}
+        {/* Input Form */}
         <View style={styles.form}>
           <TextInput
             placeholder="Tractor Number"
@@ -73,11 +78,12 @@ const Stocks = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Table Section */}
+        {/* Table Header */}
         <View style={styles.tableHeader}>
-          <CustomText style={styles.tableHeaderCell}>Tractor Number</CustomText>
+          <CustomText style={styles.tableHeaderCell}>Tractor No.</CustomText>
           <CustomText style={styles.tableHeaderCell}>Material</CustomText>
           <CustomText style={styles.tableHeaderCell}>Quantity</CustomText>
+          <CustomText style={[styles.tableHeaderCell, { flex: 0.5 }]}>Del</CustomText>
         </View>
 
         <FlatList
@@ -145,9 +151,15 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderBottomWidth: 0.5,
     borderColor: COLORS.lightGray,
+    alignItems: "center",
   },
   tableCell: {
     flex: 1,
+  },
+  deleteText: {
+    color: "red",
+    fontWeight: "bold",
+    paddingHorizontal: 8,
   },
   noDataText: {
     textAlign: "center",
