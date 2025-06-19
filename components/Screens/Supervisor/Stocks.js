@@ -16,16 +16,31 @@ const Stocks = () => {
   const [tractorNumber, setTractorNumber] = useState("");
   const [material, setMaterial] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [editId, setEditId] = useState(null);
 
-  const handleAddEntry = () => {
+  const handleAddOrUpdateEntry = () => {
     if (tractorNumber && material && quantity) {
-      const newEntry = {
-        id: Date.now().toString(),
-        tractorNumber,
-        material,
-        quantity,
-      };
-      setEntries((prevEntries) => [...prevEntries, newEntry]);
+      if (editId) {
+        // Update existing entry
+        const updatedEntries = entries.map((entry) =>
+          entry.id === editId
+            ? { ...entry, tractorNumber, material, quantity }
+            : entry
+        );
+        setEntries(updatedEntries);
+        setEditId(null);
+      } else {
+        // Add new entry
+        const newEntry = {
+          id: Date.now().toString(),
+          tractorNumber,
+          material,
+          quantity,
+        };
+        setEntries((prevEntries) => [...prevEntries, newEntry]);
+      }
+
+      // Clear form
       setTractorNumber("");
       setMaterial("");
       setQuantity("");
@@ -34,6 +49,19 @@ const Stocks = () => {
 
   const handleDelete = (id) => {
     setEntries((prevEntries) => prevEntries.filter((entry) => entry.id !== id));
+    if (editId === id) {
+      setEditId(null);
+      setTractorNumber("");
+      setMaterial("");
+      setQuantity("");
+    }
+  };
+
+  const handleEdit = (entry) => {
+    setEditId(entry.id);
+    setTractorNumber(entry.tractorNumber);
+    setMaterial(entry.material);
+    setQuantity(entry.quantity);
   };
 
   const renderItem = ({ item }) => (
@@ -41,6 +69,13 @@ const Stocks = () => {
       <CustomText style={styles.tableCell}>{item.tractorNumber}</CustomText>
       <CustomText style={styles.tableCell}>{item.material}</CustomText>
       <CustomText style={styles.tableCell}>{item.quantity}</CustomText>
+
+      {/* Edit Button */}
+      <TouchableOpacity onPress={() => handleEdit(item)}>
+        <CustomText style={styles.editText}>✏️</CustomText>
+      </TouchableOpacity>
+
+      {/* Delete Button */}
       <TouchableOpacity onPress={() => handleDelete(item.id)}>
         <CustomText style={styles.deleteText}>🗑️</CustomText>
       </TouchableOpacity>
@@ -73,8 +108,10 @@ const Stocks = () => {
             keyboardType="numeric"
             style={styles.input}
           />
-          <TouchableOpacity style={styles.button} onPress={handleAddEntry}>
-            <CustomText style={styles.buttonText}>Add Entry</CustomText>
+          <TouchableOpacity style={styles.button} onPress={handleAddOrUpdateEntry}>
+            <CustomText style={styles.buttonText}>
+              {editId ? "Update Entry" : "Add Entry"}
+            </CustomText>
           </TouchableOpacity>
         </View>
 
@@ -83,7 +120,8 @@ const Stocks = () => {
           <CustomText style={styles.tableHeaderCell}>Tractor No.</CustomText>
           <CustomText style={styles.tableHeaderCell}>Material</CustomText>
           <CustomText style={styles.tableHeaderCell}>Quantity</CustomText>
-          <CustomText style={[styles.tableHeaderCell, { flex: 0.5 }]}>Del</CustomText>
+          <CustomText style={[styles.tableHeaderCell, { flex: 0.4 }]}>✏️</CustomText>
+          <CustomText style={[styles.tableHeaderCell, { flex: 0.4 }]}>🗑️</CustomText>
         </View>
 
         <FlatList
@@ -159,7 +197,12 @@ const styles = StyleSheet.create({
   deleteText: {
     color: "red",
     fontWeight: "bold",
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
+  },
+  editText: {
+    color: "green",
+    fontWeight: "bold",
+    paddingHorizontal: 6,
   },
   noDataText: {
     textAlign: "center",
