@@ -9,9 +9,11 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Linking,
+  TouchableOpacity,
 } from "react-native";
 import { COLORS } from "../../utils/Constants";
 import CustomText from "../../utils/CustomText";
+import Icon from "react-native-vector-icons/Feather";
 
 const ContactUS = ({ navigation }) => {
   const [name, setName] = useState("");
@@ -43,7 +45,16 @@ const ContactUS = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView style={{ flex: 1 }}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() =>navigation.goBack()}>
+          <Icon name="arrow-left" size={24} color={COLORS.primary} />
+        </TouchableOpacity>
+        <CustomText style={styles.headerTitle}>Contact Us</CustomText>
+        <View style={{ width: 24 }} />
+      </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+      >
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
@@ -104,6 +115,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderGray,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: COLORS.black,
   },
   content: {
     flexGrow: 1,
