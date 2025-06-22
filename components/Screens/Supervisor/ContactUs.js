@@ -9,23 +9,26 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Linking,
+  TouchableOpacity,
 } from "react-native";
 import { COLORS } from "../../utils/Constants";
 import CustomText from "../../utils/CustomText";
+import Icon from "react-native-vector-icons/Feather";
 
-const ContactUS = () => {
+const ContactUS = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
+  const [ContactNo, setContactNo] = useState("");
 
   const handleSubmit = () => {
-    if (!name || !email || !comment) {
+    if (!name || !email || !comment || !ContactNo) {
       Alert.alert("Error", "Please fill all fields.");
       return;
     }
     const subject = encodeURIComponent("Contact Us Form Submission");
     const body = encodeURIComponent(
-      `Name: ${name}\nEmail: ${email}\nComment: ${comment}`
+      `Name: ${name}\nEmail: ${email}\nContact No: ${ContactNo}\n Comment: ${comment}`
     );
     const mailtoUrl = `mailto:vatelanka@gmail.com?subject=${subject}&body=${body}`;
     Linking.openURL(mailtoUrl)
@@ -33,6 +36,7 @@ const ContactUS = () => {
         setName("");
         setEmail("");
         setComment("");
+        setContactNo("");
       })
       .catch(() => {
         Alert.alert("Error", "Could not open the mail app.");
@@ -41,7 +45,16 @@ const ContactUS = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView style={{ flex: 1 }}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() =>navigation.goBack()}>
+          <Icon name="arrow-left" size={24} color={COLORS.primary} />
+        </TouchableOpacity>
+        <CustomText style={styles.headerTitle}>Contact Us</CustomText>
+        <View style={{ width: 24 }} />
+      </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+      >
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
@@ -64,6 +77,14 @@ const ContactUS = () => {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              placeholderTextColor={COLORS.textGray}
+            />
+            <CustomText style={styles.label}>Contact No</CustomText>
+            <TextInput
+              style={styles.input}
+              placeholder="0123456780"
+              value={ContactNo}
+              onChangeText={setContactNo}
               placeholderTextColor={COLORS.textGray}
             />
             <CustomText style={styles.label}>Comment</CustomText>
@@ -94,6 +115,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderGray,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: COLORS.black,
   },
   content: {
     flexGrow: 1,
