@@ -6,7 +6,6 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
-  ScrollView,
 } from "react-native";
 import { COLORS } from "../../utils/Constants";
 import CustomText from "../../utils/CustomText";
@@ -19,6 +18,7 @@ const Stocks = () => {
   const [editId, setEditId] = useState(null);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [materialTotals, setMaterialTotals] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleAddOrUpdateEntry = () => {
     if (tractorNumber && material && quantity) {
@@ -99,16 +99,20 @@ const Stocks = () => {
     setQuantity(entry.quantity);
   };
 
+  const filteredEntries = entries.filter(
+    (entry) =>
+      entry.tractorNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      entry.material.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const renderItem = ({ item }) => (
     <View style={styles.tableRow}>
       <CustomText style={styles.tableCell}>{item.tractorNumber}</CustomText>
       <CustomText style={styles.tableCell}>{item.material}</CustomText>
       <CustomText style={styles.tableCell}>{item.quantity}</CustomText>
-
       <TouchableOpacity onPress={() => handleEdit(item)}>
         <CustomText style={styles.editText}>✏️</CustomText>
       </TouchableOpacity>
-
       <TouchableOpacity onPress={() => handleDelete(item.id)}>
         <CustomText style={styles.deleteText}>🗑️</CustomText>
       </TouchableOpacity>
@@ -117,10 +121,18 @@ const Stocks = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <View style={styles.content}>
         <CustomText style={styles.heading}>Stocks Page</CustomText>
 
-        {/* Input Form */}
+        {/* Search Input */}
+        <TextInput
+          placeholder="Search by Tractor Number or Material"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          style={styles.input}
+        />
+
+        {/* Form Inputs */}
         <View style={styles.form}>
           <TextInput
             placeholder="Tractor Number"
@@ -156,28 +168,30 @@ const Stocks = () => {
           <CustomText style={[styles.tableHeaderCell, { flex: 0.4 }]}>✏️</CustomText>
           <CustomText style={[styles.tableHeaderCell, { flex: 0.4 }]}>🗑️</CustomText>
         </View>
+      </View>
 
-        <FlatList
-          data={entries}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          ListEmptyComponent={
-            <CustomText style={styles.noDataText}>No entries yet</CustomText>
-          }
-        />
+      {/* List Below Form */}
+      <FlatList
+        data={filteredEntries}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        ListEmptyComponent={
+          <CustomText style={styles.noDataText}>No entries found</CustomText>
+        }
+        contentContainerStyle={{ padding: 20 }}
+      />
 
-        {/* Totals Section */}
-        <View style={{ marginTop: 20 }}>
-          <CustomText style={{ fontWeight: "bold", fontSize: 16 }}>
-            Total Quantity: {totalQuantity}
+      {/* Totals Section */}
+      <View style={{ padding: 20 }}>
+        <CustomText style={{ fontWeight: "bold", fontSize: 16 }}>
+          Total Quantity: {totalQuantity}
+        </CustomText>
+        {Object.entries(materialTotals).map(([mat, qty]) => (
+          <CustomText key={mat}>
+            {mat}: {qty}
           </CustomText>
-          {Object.entries(materialTotals).map(([mat, qty]) => (
-            <CustomText key={mat}>
-              {mat}: {qty}
-            </CustomText>
-          ))}
-        </View>
-      </ScrollView>
+        ))}
+      </View>
     </SafeAreaView>
   );
 };
@@ -198,7 +212,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   form: {
-    marginBottom: 30,
+    marginBottom: 20,
   },
   input: {
     borderWidth: 1,
