@@ -167,7 +167,10 @@ export default function TruckMap({ route, navigation }) {
       />
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Icon name="arrow-left" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <CustomText style={styles.headerTitle}>Truck Tracking</CustomText>
@@ -335,7 +338,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: COLORS.black,
+    color: COLORS.primary,
+    marginTop: 15,
+    marginRight: 15,
   },
   mapContainer: {
     flex: 1,
@@ -354,6 +359,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+  },
+  backButton: {
+    paddingRight: 12,
+    marginTop: 15,
   },
   noDataText: {
     fontSize: 16,
