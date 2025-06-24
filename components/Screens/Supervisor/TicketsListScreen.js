@@ -411,7 +411,10 @@ export default function TicketsListScreen({ route, navigation }) {
       />
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Icon name="arrow-left" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <CustomText style={styles.headerTitle}>Tickets</CustomText>
@@ -621,7 +624,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: COLORS.black,
+    color: COLORS.primary,
+    marginTop: 15,
+    marginRight: 18,
   },
   searchContainer: {
     padding: 15,
@@ -657,6 +662,10 @@ const styles = StyleSheet.create({
   },
   activeFilter: {
     backgroundColor: COLORS.primary + "20",
+  },
+  backButton: {
+    paddingRight: 12,
+    marginTop: 15,
   },
   statusDot: {
     width: 10,

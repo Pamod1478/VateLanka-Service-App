@@ -605,8 +605,6 @@ export default function SupervisorHomeScreen({ route, navigation }) {
             )}
           </View>
 
-          
-
           <CustomText style={styles.mapFooter}>
             {activeTrucks.length} active trucks on duty
           </CustomText>
@@ -694,17 +692,13 @@ export default function SupervisorHomeScreen({ route, navigation }) {
                 </TouchableOpacity>
               )}
             </View>
-
-            
           )}
         </View>
 
         <View style={styles.StockCard}>
           <View style={styles.cardHeader}>
             <Icon name="package" size={20} color={COLORS.primary} />
-            <CustomText style={styles.cardTitle}>
-              Stocks
-            </CustomText>
+            <CustomText style={styles.cardTitle}>Stocks</CustomText>
 
             <TouchableOpacity
               style={styles.viewAllButton}
@@ -714,15 +708,12 @@ export default function SupervisorHomeScreen({ route, navigation }) {
               <Icon name="chevron-right" size={16} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
-
-          </View>
+        </View>
 
         <View style={styles.StockCard}>
           <View style={styles.cardHeader}>
             <Icon name="phone" size={20} color={COLORS.primary} />
-            <CustomText style={styles.cardTitle}>
-              Contact US
-            </CustomText>
+            <CustomText style={styles.cardTitle}>Contact US</CustomText>
 
             <TouchableOpacity
               style={styles.viewAllButton}
@@ -732,7 +723,6 @@ export default function SupervisorHomeScreen({ route, navigation }) {
               <Icon name="chevron-right" size={16} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
-
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -762,6 +752,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "600",
     color: COLORS.primary,
+    marginTop: 10,
   },
   dateText: {
     fontSize: 14,

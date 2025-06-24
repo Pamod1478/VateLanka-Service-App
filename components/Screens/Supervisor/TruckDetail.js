@@ -144,7 +144,10 @@ export default function TruckDetail({ route, navigation }) {
       />
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Icon name="arrow-left" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <CustomText style={styles.headerTitle}>Truck Details</CustomText>
@@ -160,6 +163,7 @@ export default function TruckDetail({ route, navigation }) {
               trucks: [truck],
             })
           }
+          style={styles.mapButton}
         >
           <Icon name="map" size={24} color={COLORS.primary} />
         </TouchableOpacity>
@@ -492,7 +496,16 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: COLORS.black,
+    color: COLORS.primary,
+    marginTop: 15,
+    marginRight: 15,
+  },
+  backButton: {
+    paddingRight: 12,
+    marginTop: 15,
+  },
+  mapButton: {
+    marginTop: 16,
   },
   content: {
     flex: 1,
