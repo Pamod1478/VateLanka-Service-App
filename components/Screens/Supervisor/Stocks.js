@@ -17,30 +17,50 @@ const Stocks = () => {
   const [material, setMaterial] = useState("");
   const [quantity, setQuantity] = useState("");
   const [editId, setEditId] = useState(null);
+  const [totalQuantity, setTotalQuantity] = useState(0);
+  const [materialTotals, setMaterialTotals] = useState({});
 
   const handleAddOrUpdateEntry = () => {
     if (tractorNumber && material && quantity) {
+      const numericQuantity = parseFloat(quantity);
+      if (isNaN(numericQuantity)) return;
+
       if (editId) {
-        // Update existing entry
+        const oldEntry = entries.find((e) => e.id === editId);
+        const oldQuantity = parseFloat(oldEntry.quantity);
         const updatedEntries = entries.map((entry) =>
           entry.id === editId
             ? { ...entry, tractorNumber, material, quantity }
             : entry
         );
         setEntries(updatedEntries);
+
+        setTotalQuantity(totalQuantity - oldQuantity + numericQuantity);
+
+        setMaterialTotals((prev) => {
+          const updated = { ...prev };
+          updated[oldEntry.material] =
+            (updated[oldEntry.material] || 0) - oldQuantity;
+          updated[material] = (updated[material] || 0) + numericQuantity;
+          return updated;
+        });
+
         setEditId(null);
       } else {
-        // Add new entry
         const newEntry = {
           id: Date.now().toString(),
           tractorNumber,
           material,
           quantity,
         };
-        setEntries((prevEntries) => [...prevEntries, newEntry]);
+        setEntries((prev) => [...prev, newEntry]);
+        setTotalQuantity((prev) => prev + numericQuantity);
+        setMaterialTotals((prev) => ({
+          ...prev,
+          [material]: (prev[material] || 0) + numericQuantity,
+        }));
       }
 
-      // Clear form
       setTractorNumber("");
       setMaterial("");
       setQuantity("");
@@ -48,7 +68,22 @@ const Stocks = () => {
   };
 
   const handleDelete = (id) => {
+    const deletedEntry = entries.find((entry) => entry.id === id);
+    const numericQuantity = parseFloat(deletedEntry.quantity);
+
     setEntries((prevEntries) => prevEntries.filter((entry) => entry.id !== id));
+    setTotalQuantity((prev) => prev - numericQuantity);
+
+    setMaterialTotals((prev) => {
+      const updated = { ...prev };
+      updated[deletedEntry.material] =
+        (updated[deletedEntry.material] || 0) - numericQuantity;
+      if (updated[deletedEntry.material] <= 0) {
+        delete updated[deletedEntry.material];
+      }
+      return updated;
+    });
+
     if (editId === id) {
       setEditId(null);
       setTractorNumber("");
@@ -70,12 +105,10 @@ const Stocks = () => {
       <CustomText style={styles.tableCell}>{item.material}</CustomText>
       <CustomText style={styles.tableCell}>{item.quantity}</CustomText>
 
-      {/* Edit Button */}
       <TouchableOpacity onPress={() => handleEdit(item)}>
         <CustomText style={styles.editText}>✏️</CustomText>
       </TouchableOpacity>
 
-      {/* Delete Button */}
       <TouchableOpacity onPress={() => handleDelete(item.id)}>
         <CustomText style={styles.deleteText}>🗑️</CustomText>
       </TouchableOpacity>
@@ -132,6 +165,18 @@ const Stocks = () => {
             <CustomText style={styles.noDataText}>No entries yet</CustomText>
           }
         />
+
+        {/* Totals Section */}
+        <View style={{ marginTop: 20 }}>
+          <CustomText style={{ fontWeight: "bold", fontSize: 16 }}>
+            Total Quantity: {totalQuantity}
+          </CustomText>
+          {Object.entries(materialTotals).map(([mat, qty]) => (
+            <CustomText key={mat}>
+              {mat}: {qty}
+            </CustomText>
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
