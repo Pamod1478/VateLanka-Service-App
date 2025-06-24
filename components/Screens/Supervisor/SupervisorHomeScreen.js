@@ -710,7 +710,7 @@ export default function SupervisorHomeScreen({ route, navigation }) {
           </View>
         </View>
 
-        <View style={styles.StockCard}>
+        <View style={styles.ContactCard}>
           <View style={styles.cardHeader}>
             <Icon name="phone" size={20} color={COLORS.primary} />
             <CustomText style={styles.cardTitle}>Contact US</CustomText>
@@ -1123,4 +1123,16 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
+    ContactCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+
 });
