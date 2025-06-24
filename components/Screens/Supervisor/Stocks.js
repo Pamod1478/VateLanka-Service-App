@@ -6,9 +6,15 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
+  SectionList,
 } from "react-native";
 import { COLORS } from "../../utils/Constants";
 import CustomText from "../../utils/CustomText";
+
+const getCurrentDate = () => {
+  const today = new Date();
+  return today.toISOString().split("T")[0]; // YYYY-MM-DD
+};
 
 const Stocks = () => {
   const [entries, setEntries] = useState([]);
@@ -24,6 +30,8 @@ const Stocks = () => {
     if (tractorNumber && material && quantity) {
       const numericQuantity = parseFloat(quantity);
       if (isNaN(numericQuantity)) return;
+
+      const date = getCurrentDate();
 
       if (editId) {
         const oldEntry = entries.find((e) => e.id === editId);
@@ -52,6 +60,7 @@ const Stocks = () => {
           tractorNumber,
           material,
           quantity,
+          date,
         };
         setEntries((prev) => [...prev, newEntry]);
         setTotalQuantity((prev) => prev + numericQuantity);
@@ -61,6 +70,7 @@ const Stocks = () => {
         }));
       }
 
+      setSearchQuery(material); // auto filter by added material
       setTractorNumber("");
       setMaterial("");
       setQuantity("");
@@ -105,6 +115,21 @@ const Stocks = () => {
       entry.material.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Group entries by date for SectionList
+  const groupedByDate = filteredEntries.reduce((acc, entry) => {
+    const date = entry.date || getCurrentDate();
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(entry);
+    return acc;
+  }, {});
+
+  const sections = Object.keys(groupedByDate)
+    .sort((a, b) => new Date(b) - new Date(a)) // newest first
+    .map((date) => ({
+      title: date,
+      data: groupedByDate[date],
+    }));
+
   const renderItem = ({ item }) => (
     <View style={styles.tableRow}>
       <CustomText style={styles.tableCell}>{item.tractorNumber}</CustomText>
@@ -124,13 +149,17 @@ const Stocks = () => {
       <View style={styles.content}>
         <CustomText style={styles.heading}>Stocks Page</CustomText>
 
-        {/* Search Input */}
         <TextInput
           placeholder="Search by Tractor Number or Material"
           value={searchQuery}
           onChangeText={setSearchQuery}
           style={styles.input}
         />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery("")} style={styles.resetBtn}>
+            <CustomText style={{ color: COLORS.primary }}>Show All</CustomText>
+          </TouchableOpacity>
+        )}
 
         {/* Form Inputs */}
         <View style={styles.form}>
@@ -159,29 +188,32 @@ const Stocks = () => {
             </CustomText>
           </TouchableOpacity>
         </View>
-
-        {/* Table Header */}
-        <View style={styles.tableHeader}>
-          <CustomText style={styles.tableHeaderCell}>Tractor No.</CustomText>
-          <CustomText style={styles.tableHeaderCell}>Material</CustomText>
-          <CustomText style={styles.tableHeaderCell}>Quantity</CustomText>
-          <CustomText style={[styles.tableHeaderCell, { flex: 0.4 }]}>✏️</CustomText>
-          <CustomText style={[styles.tableHeaderCell, { flex: 0.4 }]}>🗑️</CustomText>
-        </View>
       </View>
 
-      {/* List Below Form */}
-      <FlatList
-        data={filteredEntries}
+      {/* Grouped Table by Date */}
+      <SectionList
+        sections={sections}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        renderSectionHeader={({ section: { title } }) => (
+          <View style={styles.tableHeaderSection}>
+            <CustomText style={styles.sectionHeaderText}>Date: {title}</CustomText>
+            <View style={styles.tableHeader}>
+              <CustomText style={styles.tableHeaderCell}>Tractor No.</CustomText>
+              <CustomText style={styles.tableHeaderCell}>Material</CustomText>
+              <CustomText style={styles.tableHeaderCell}>Quantity</CustomText>
+              <CustomText style={[styles.tableHeaderCell, { flex: 0.4 }]}>✏️</CustomText>
+              <CustomText style={[styles.tableHeaderCell, { flex: 0.4 }]}>🗑️</CustomText>
+            </View>
+          </View>
+        )}
         ListEmptyComponent={
           <CustomText style={styles.noDataText}>No entries found</CustomText>
         }
         contentContainerStyle={{ padding: 20 }}
       />
 
-      {/* Totals Section */}
+      {/* Totals */}
       <View style={{ padding: 20 }}>
         <CustomText style={{ fontWeight: "bold", fontSize: 16 }}>
           Total Quantity: {totalQuantity}
@@ -235,7 +267,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderBottomWidth: 1,
     borderColor: COLORS.gray,
-    paddingBottom: 8,
+    paddingBottom: 5,
+    marginBottom: 5,
+  },
+  tableHeaderSection: {
+    marginTop: 20,
+  },
+  sectionHeaderText: {
+    fontWeight: "bold",
+    fontSize: 16,
+    color: COLORS.primary,
     marginBottom: 5,
   },
   tableHeaderCell: {
@@ -266,7 +307,11 @@ const styles = StyleSheet.create({
   noDataText: {
     textAlign: "center",
     color: COLORS.gray,
-    marginTop: 10,
+    marginTop: 20,
+  },
+  resetBtn: {
+    alignSelf: "flex-end",
+    marginBottom: 10,
   },
 });
 
