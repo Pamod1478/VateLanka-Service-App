@@ -46,15 +46,13 @@ const ContactUS = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() =>navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-left" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <CustomText style={styles.headerTitle}>Contact Us</CustomText>
         <View style={{ width: 24 }} />
       </View>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
@@ -124,11 +122,12 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderGray,
+    marginTop: 15,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: COLORS.black,
+    color: COLORS.primary,
   },
   content: {
     flexGrow: 1,
